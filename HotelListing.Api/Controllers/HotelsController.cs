@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HotelListing.Api.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
+[ApiController] 
 public class HotelsController : ControllerBase
 {
     private static List<Hotel> hotels = new List<Hotel>
