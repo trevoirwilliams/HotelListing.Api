@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using HotelListing.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using HotelListing.Api.Data;
 
 namespace HotelListing.Api.Controllers;
 
@@ -26,7 +21,9 @@ public class CountriesController(HotelListingDbContext context) : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Country>> GetCountry(int id)
     {
-        var country = await context.Countries.FindAsync(id);
+        var country = await context.Countries
+            .Include(c => c.Hotels) // Eager loading the Hotels navigation property
+            .FirstOrDefaultAsync(q => q.CountryId == id);
 
         if (country == null)
         {
@@ -54,7 +51,7 @@ public class CountriesController(HotelListingDbContext context) : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (! await CountryExistsAsync(id))
+            if (!await CountryExistsAsync(id))
             {
                 return NotFound();
             }

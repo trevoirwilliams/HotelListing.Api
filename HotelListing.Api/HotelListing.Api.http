@@ -1,42 +1,6 @@
 @HotelListing.Api_HostAddress = https://localhost:7124
-
-GET {{HotelListing.Api_HostAddress}}/api/hotels
-
 ###
-
-POST {{HotelListing.Api_HostAddress}}/api/hotels
-Content-Type: application/json
-
-{
-    "id": 4,
-    "name": "Grand Plaza",
-    "address": "123 Main St",
-    "rating": 4.5
-}
-
-###
-
-@id=4
-DELETE {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
-
-###
-
-GET {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
-
-###
-
-PUT {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
-Content-Type: application/json
-
-{
-    "id": 4,
-    "name": "Test Hotel",
-    "address": "123 Main St",
-    "rating": 4.5
-}
-
-###
-@id=2
+@id=3
 GET {{HotelListing.Api_HostAddress}}/api/countries
 
 ###
@@ -67,4 +31,42 @@ Content-Type: application/json
   "name": "Jamaica",
   "shortName": "JM"
 }
+###
+
+GET {{HotelListing.Api_HostAddress}}/api/hotels
+
+###
+
+POST {{HotelListing.Api_HostAddress}}/api/hotels
+Content-Type: application/json
+
+{
+  "Name": "Test Hotel",
+  "Address": "123 Main St",
+  "Rating": 4.5,
+  "CountryId": 3
+}
+
+###
+#@id=3
+DELETE {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
+
+###
+
+GET {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
+
+###
+
+PUT {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
+Content-Type: application/json
+
+{
+  "Id": 1,
+  "Name": "Ocean Coral",
+  "Address": "Trelawny, Jamaica",
+  "Rating": 4.5,
+  "CountryId": 1
+}
+
+
 ###
