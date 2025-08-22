@@ -10,7 +10,7 @@ Content-Type: application/json
 
 {
   "name": "Test Country",
-  "shortName": "null"
+  "shortName": "IC"
 }
 
 ###
@@ -65,7 +65,7 @@ Content-Type: application/json
   "Name": "Ocean Coral",
   "Address": "Trelawny, Jamaica",
   "Rating": 4.5,
-  "CountryId": 1
+  "CountryId": 100
 }
 
 
