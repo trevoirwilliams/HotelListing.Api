@@ -1,22 +1,27 @@
 @HotelListing.Api_HostAddress = https://localhost:7124
+@json = application/json
+@apiKey=dXNlcjFAbG9jYWxob3N0LmNvbTpQQHNzrbd29yZDE=
+
 ###
 @id=3
-GET {{HotelListing.Api_HostAddress}}/api/countries
 
+GET {{HotelListing.Api_HostAddress}}/api/countries
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3YS0xOWRjLTRjOWEtOGEwMC05OTk4ODFiNzQ0MWUiLCJlbWFpbCI6ImFkbWluMUBsb2NhbGhvc3QuY29tIiwianRpIjoiZDFkMDk1N2ItZTM0Zi00Y2VlLWJjODMtMWZiMzk4NDlmYzY3IiwibmFtZSI6Ikxhc3QsIEZpcnN0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc1NjUyNTA2NSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.t2tATBbdWAdXPQKTR0QhOX76PZc4Narm_XIBWx8-yKU
 ###
 
 POST {{HotelListing.Api_HostAddress}}/api/countries
-Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3YS0xOWRjLTRjOWEtOGEwMC05OTk4ODFiNzQ0MWUiLCJlbWFpbCI6ImFkbWluMUBsb2NhbGhvc3QuY29tIiwianRpIjoiZDFkMDk1N2ItZTM0Zi00Y2VlLWJjODMtMWZiMzk4NDlmYzY3IiwibmFtZSI6Ikxhc3QsIEZpcnN0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc1NjUyNTA2NSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.t2tATBbdWAdXPQKTR0QhOX76PZc4Narm_XIBWx8-yKU
+Content-Type: {{json}}
 
 {
-  "name": "Test Country",
-  "shortName": "IC"
+  "name": "Test Admin Country",
+  "shortName": "TAC"
 }
 
 ###
 
 DELETE {{HotelListing.Api_HostAddress}}/api/countries/{{id}}
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3YS0xOWRjLTRjOWEtOGEwMC05OTk4ODFiNzQ0MWUiLCJlbWFpbCI6ImFkbWluMUBsb2NhbGhvc3QuY29tIiwianRpIjoiZDFkMDk1N2ItZTM0Zi00Y2VlLWJjODMtMWZiMzk4NDlmYzY3IiwibmFtZSI6Ikxhc3QsIEZpcnN0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc1NjUyNTA2NSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.t2tATBbdWAdXPQKTR0QhOX76PZc4Narm_XIBWx8-yKU
 ###
 
 GET {{HotelListing.Api_HostAddress}}/api/countries/{{id}}
@@ -24,8 +29,7 @@ GET {{HotelListing.Api_HostAddress}}/api/countries/{{id}}
 ###
 
 PUT {{HotelListing.Api_HostAddress}}/api/countries/{{id}}
-Content-Type: application/json
-
+Content-Type: {{json}}
 {
   "countryId": 2,
   "name": "Jamaica",
@@ -38,8 +42,7 @@ GET {{HotelListing.Api_HostAddress}}/api/hotels
 ###
 
 POST {{HotelListing.Api_HostAddress}}/api/hotels
-Content-Type: application/json
-
+Content-Type: {{json}}
 {
   "Name": "Moon Palace",
   "Address": "Ocho Rios, Jamaica",
@@ -58,8 +61,7 @@ GET {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
 ###
 
 PUT {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
-Content-Type: application/json
-
+Content-Type: {{json}}
 {
   "Id": 3,
   "Name": "Ocean Coral",
@@ -68,5 +70,55 @@ Content-Type: application/json
   "CountryId": 100
 }
 
+###
+POST {{HotelListing.Api_HostAddress}}/api/auth/register
+Content-Type: {{json}}
+{
+  "email": "user1@localhost.com",
+  "password": "P@ssword1",
+  "firstName":"First",
+  "lastName": "Last"
+}
+
+###
+POST {{HotelListing.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin1@localhost.com",
+  "password": "P@ssword1"
+}
+
+###
+POST {{HotelListing.Api_HostAddress}}/api/defaultauth/login
+Content-Type: application/json
+
+{
+  "email": "user@localhost.com",
+  "password": "P@ssword1"
+}
+
+###
+
+POST {{HotelListing.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin1@localhost.com",
+  "password": "P@ssword1",
+  "firstName":"First",
+  "lastName": "Last",
+  "role": "Administrator"
+}
+
+###
+
+GET {{HotelListing.Api_HostAddress}}/api/apikey
+X-Api-Key: {{apiKey}}
+
+###
+
+GET {{HotelListing.Api_HostAddress}}/api/basicauth
+Authorization: Basic dXNlcjFAbG9jYWxob3N0LmNvbTpQQHNzd29yZDE=
 
 ###
