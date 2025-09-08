@@ -10,5 +10,4 @@ public class ApplicationUser : IdentityUser
 
     [NotMapped]
     public string FullName => $"{LastName}, {FirstName}";
-
 }

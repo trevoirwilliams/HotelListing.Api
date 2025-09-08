@@ -5,14 +5,14 @@ using HotelListing.Api.Results;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace HotelListing.Api.Services;
 
-public class UsersService(UserManager<ApplicationUser> userManager, 
-    IConfiguration configuration) : IUsersService
+public class UsersService(UserManager<ApplicationUser> userManager, HotelListingDbContext hotelListingDbContext, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : IUsersService
 {
     public async Task<Result<RegisteredUserDto>> RegisterAsync(RegisterUserDto registerUserDto)
     {
@@ -32,6 +32,18 @@ public class UsersService(UserManager<ApplicationUser> userManager,
         }
 
         await userManager.AddToRoleAsync(user, registerUserDto.Role);
+
+        // If Hotel Admin, add to HotelAdmins table
+        if (registerUserDto.Role == "Hotel Admin")
+        {
+            var hotelAdmin = hotelListingDbContext.HotelAdmins.Add(
+                new HotelAdmin
+                {
+                    UserId = user.Id,
+                    HotelId = registerUserDto.AssociatedHotelId.GetValueOrDefault()
+                });
+            await hotelListingDbContext.SaveChangesAsync();
+        }
 
         var registeredUser = new RegisteredUserDto
         {
@@ -65,6 +77,16 @@ public class UsersService(UserManager<ApplicationUser> userManager,
 
         return Result<string>.Success(token);
     }
+
+    public string UserId => httpContextAccessor?
+            .HttpContext?
+            .User?
+            .FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+        ?? httpContextAccessor?
+            .HttpContext?
+            .User?
+            .FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        ?? string.Empty;
 
     private async Task<string> GenerateToken(ApplicationUser user)
     {

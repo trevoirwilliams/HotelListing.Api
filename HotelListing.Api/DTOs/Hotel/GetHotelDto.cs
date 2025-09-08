@@ -6,7 +6,7 @@ public record GetHotelDto(
     string Address,
     double Rating,
     int CountryId,
-    string Country);
+    string CountryName);
 
 public record GetHotelSlimDto(
     int Id,

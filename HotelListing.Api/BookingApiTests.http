@@ -1,0 +1,172 @@
+### Variables
+@json = application/json
+@host=https://localhost:7124
+@hotelId=3
+@bookingId=7
+@today={{$localDatetime iso8601}} 
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlOGM2OGI0Yy1mODBjLTQ2NzUtOTJjMy00MTlhYzg1ZTlmZDMiLCJlbWFpbCI6ImhvdGVsYWRtaW4yQGxvY2FsaG9zdC5jb20iLCJqdGkiOiJjMDJjYTdiMi0yNzlmLTQzYmQtYmIzZS05NDBmYmJhNDZkNzciLCJuYW1lIjoiQWRtaW4sIEhvdGVsIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiSG90ZWwgQWRtaW4iLCJleHAiOjE3NTczNjUzODQsImlzcyI6IkhvdGVsTGlzdGluZ0FQSSIsImF1ZCI6IkhvdGVsTGlzdGluZ0FQSUNsaWVudCJ9.v_OtrH_R7jM8vQB6WK2D3pH6g7_A4WhtwSFQqKYZ5qA
+###
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "hoteladmin2@localhost.com",
+  "password": "P@ssword1",
+  "firstName":"Hotel",
+  "lastName": "Admin",
+  "role": "Hotel Admin",
+  "associatedHotelId": 3
+}
+###
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "hoteladmin2@localhost.com",
+  "password": "P@ssword1"
+}
+###
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@localhost.com",
+  "password": "P@ssword1"
+}
+
+###
+# 1. CreateBookingDto - Happy path (3 nights)
+POST {{host}}/api/hotels/{{hotelId}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "hotelId": {{hotelId}},
+  "checkIn": "2025-10-15",
+  "checkOut": "2025-10-18",
+  "guests": 2
+}
+
+###
+# 2. CreateBookingDto - Different hotel, single night stay
+POST {{host}}/api/hotels/{{hotelId}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "hotelId": {{hotelId}},
+  "checkIn": "2025-11-01",
+  "checkOut": "2025-11-02",
+  "guests": 1
+}
+
+###
+# 3. CreateBookingDto - Invalid (checkOut before checkIn)
+# Expect: Validation error "Check-out must be after check-in."
+POST {{host}}/api/hotels/{{hotelId}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "hotelId": {{hotelId}},
+  "checkIn": "2025-12-05",
+  "checkOut": "2025-12-04",
+  "guests": 2
+}
+
+###
+# 4. CreateBookingDto - Invalid (guests <= 0)
+# Expect: Validation error "Guests must be at least 1."
+POST {{host}}/api/hotels/{{hotelId}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+{
+  "hotelId": {{hotelId}},
+  "checkIn": "2025-12-10",
+  "checkOut": "2025-12-12",
+  "guests": 0
+}
+
+###
+# 5. CreateBookingDto - Overlap test (make sure an earlier booking exists with same dates)
+# Expect: Conflict "The selected dates overlap with an existing booking."
+POST {{host}}/api/hotels/{{hotelId}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "hotelId": {{hotelId}},
+  "checkIn": "2025-10-14",
+  "checkOut": "2025-10-16",
+  "guests": 1
+}
+
+###
+# 6. UpdateBookingDto - Extend stay 
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "checkIn": "2025-10-15",
+  "checkOut": "2025-10-20",
+  "guests": 2
+}
+
+###
+# 7. UpdateBookingDto - Shrink stay & change guests
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "checkIn": "2025-10-11",
+  "checkOut": "2025-10-13",
+  "guests": 3
+}
+
+###
+# 8. UpdateBookingDto - Invalid (same day)
+# Expect: Validation error (Check-out must be after check-in.)
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "checkIn": "2025-11-20",
+  "checkOut": "2025-11-20",
+  "guests": 2
+}
+
+###
+# 9. UpdateBookingDto - Invalid guests
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "checkIn": "2025-11-20",
+  "checkOut": "2025-11-22",
+  "guests": 0
+}
+
+###
+# 10. Admin confirm booking
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}/admin/confirm
+Authorization: Bearer {{token}}
+
+###
+# 11. Admin cancel booking
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}/admin/cancel
+Authorization: Bearer {{token}}
+
+###
+# 12. User cancel booking
+PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}/cancel
+
+###
+# 13. List all bookings for hotel
+GET {{host}}/api/hotels/{{hotelId}}/bookings/admin
+Authorization: Bearer {{token}}
+
+###

@@ -15,7 +15,9 @@ public class HotelsService(HotelListingDbContext context,
 {
     public async Task<Result<IEnumerable<GetHotelDto>>> GetHotelsAsync()
     {
+        var test = context.Hotels.ToList();
         var hotels = await context.Hotels
+            .Include(q => q.Country)
             .ProjectTo<GetHotelDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
