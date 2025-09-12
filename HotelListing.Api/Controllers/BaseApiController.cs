@@ -1,5 +1,5 @@
-using System.Linq;
-using HotelListing.Api.Results;
+using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Common.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelListing.Api.Controllers;

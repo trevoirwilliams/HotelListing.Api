@@ -1,4 +1,5 @@
-﻿using HotelListing.Api.Data;
+﻿using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -28,12 +29,12 @@ public class HotelOrSystemAdminFilter(HotelListingDbContext dbContext) : IAsyncA
         }
 
         // If user is a global Administrator, allow immediately
-        if (httpUser!.IsInRole("Administrator"))
+        if (httpUser!.IsInRole(RoleNames.Administrator))
         {
             return;
         }
 
-        var userId = httpUser.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? httpUser.FindFirst(ClaimTypes.NameIdentifier)?.Value ;
+        var userId = httpUser.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? httpUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -54,10 +55,10 @@ public class HotelOrSystemAdminFilter(HotelListingDbContext dbContext) : IAsyncA
         var isHotelAdminUser = await dbContext.HotelAdmins
             .AnyAsync(q => q.UserId == userId && q.HotelId == hotelId);
 
-        if (!isHotelAdminUser) 
+        if (!isHotelAdminUser)
         {
             context.Result = new ForbidResult();
             return;
-        }    
+        }
     }
 }
