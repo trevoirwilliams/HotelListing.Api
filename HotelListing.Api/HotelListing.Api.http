@@ -1,12 +1,18 @@
 @HotelListing.Api_HostAddress = https://localhost:7124
 @json = application/json
 @apiKey=dXNlcjFAbG9jYWxob3N0LmNvbTpQQHNzrbd29yZDE=
-
-###
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODMzYjRhYS05YThlLTRlZWQtYjVhZS0wNmM4ZDYwNTIwNTMiLCJlbWFpbCI6InVzZXJAbG9jYWxob3N0LmNvbSIsImp0aSI6ImY5OWU5YmJlLWUxZTgtNDgyNi1iNmZkLWQ4MWVlOWRmNjViMiIsIm5hbWUiOiIsICIsImV4cCI6MTc1OTEyODM4OCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.nLSQ3jUqBhXcY4KN7HmfqGZ3edFKQV3i7Fsx-jk5d_w
 @id=3
+@countryId=90
+@pageSize=5
 
-GET {{HotelListing.Api_HostAddress}}/api/countries
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3YS0xOWRjLTRjOWEtOGEwMC05OTk4ODFiNzQ0MWUiLCJlbWFpbCI6ImFkbWluMUBsb2NhbGhvc3QuY29tIiwianRpIjoiMjEzMjdmZDktYjU3Yi00MTg4LWE3ZWEtYThkMzgwOWE5NmIyIiwibmFtZSI6Ikxhc3QsIEZpcnN0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc1NzY0MzY5NiwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.uZLCkHkWXlKoJy4KpDKeCycGLsaJ8lvSxu0lM-yN508
+GET {{HotelListing.Api_HostAddress}}/api/countries?countryName=United&pageNumber=1&pageSize=20
+Authorization: Bearer {{token}}
+###
+
+# Get Country Hotels - Large Page Size
+GET {{HotelListing.Api_HostAddress}}/api/countries/{{countryId}}/hotels?pageNumber=1&pageSize=20
+Authorization: Bearer {{token}}
 ###
 
 POST {{HotelListing.Api_HostAddress}}/api/countries

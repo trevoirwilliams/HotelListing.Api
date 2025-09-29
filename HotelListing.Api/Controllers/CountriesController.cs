@@ -1,6 +1,9 @@
 ﻿using HotelListing.Api.Application.Contracts;
 using HotelListing.Api.Application.DTOs.Country;
+using HotelListing.Api.Application.DTOs.Hotel;
 using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Common.Models.Filtering;
+using HotelListing.Api.Common.Models.Paging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +19,17 @@ public class CountriesController(ICountriesService countriesService) : BaseApiCo
     public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries()
     {
         var result = await countriesService.GetCountriesAsync();
+        return ToActionResult(result);
+    }
+
+    // GET: api/Countries/{id}/hotels
+    [HttpGet("{countryId:int}/hotels")]
+    public async Task<ActionResult<PagedResult<GetCountriesDto>>> GetCountryHotels(
+        [FromRoute] int countryId,
+        [FromQuery] PaginationParameters paginationParameters,
+        [FromQuery] CountryFilterParameters filters)
+    {
+        var result = await countriesService.GetCountryHotelsAsync(countryId, paginationParameters, filters);
         return ToActionResult(result);
     }
 

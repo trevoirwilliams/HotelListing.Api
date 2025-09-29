@@ -2,10 +2,15 @@
 using AutoMapper.QueryableExtensions;
 using HotelListing.Api.Application.Contracts;
 using HotelListing.Api.Application.DTOs.Country;
+using HotelListing.Api.Application.DTOs.Hotel;
 using HotelListing.Api.Common.Constants;
+using HotelListing.Api.Common.Models.Extensions;
+using HotelListing.Api.Common.Models.Filtering;
+using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Results;
 using HotelListing.Api.Domain;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HotelListing.Api.Application.Services;
 
@@ -116,5 +121,51 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
     {
         return await context.Countries
             .AnyAsync(c => c.Name.ToLower().Trim() == name.ToLower().Trim());
+    }
+
+    public async Task<Result<PagedResult<GetCountriesDto>>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters)
+    {
+        var exists = await CountryExistsAsync(countryId);
+        if (!exists)
+        {
+            return Result<PagedResult<GetCountriesDto>>.Failure(
+                new Error(ErrorCodes.NotFound, $"Country '{countryId}' was not found."));
+        }
+
+        var query = context.Countries.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filters.CountryName))
+        {
+            var name = filters.CountryName.Trim();
+            query = query.Where(c => EF.Functions.Like(c.Name, $"%{name}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filters.Search))
+        {
+            var term = filters.Search.Trim();
+            query = query.Where(c =>
+                EF.Functions.Like(c.Name, $"%{term}%") ||
+                EF.Functions.Like(c.ShortName, $"%{term}%"));
+        }
+
+        if (filters.HasHotels.HasValue)
+        {
+            query = query.Where(c => c.Hotels.Any() == filters.HasHotels.Value);
+        }
+
+        // Sorting
+        query = (filters.SortBy?.Trim().ToLowerInvariant()) switch
+        {
+            "name" => filters.SortDescending ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
+            "shortname" => filters.SortDescending ? query.OrderByDescending(c => c.ShortName) : query.OrderBy(c => c.ShortName),
+            "hotelcount" => filters.SortDescending ? query.OrderByDescending(c => c.Hotels.Count) : query.OrderBy(c => c.Hotels.Count),
+            _ => query.OrderBy(c => c.Name) // default
+        };
+
+        var paged = await query
+            .ProjectTo<GetCountriesDto>(mapper.ConfigurationProvider)
+            .ToPagedResultAsync(paginationParameters);
+
+        return Result<PagedResult<GetCountriesDto>>.Success(paged);
     }
 }
