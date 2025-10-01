@@ -10,15 +10,23 @@ using HotelListing.Api.Common.Models.Paging;
 using HotelListing.Api.Common.Results;
 using HotelListing.Api.Domain;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HotelListing.Api.Application.Services;
 
 public class CountriesService(HotelListingDbContext context, IMapper mapper) : ICountriesService
 {
-    public async Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync()
+    public async Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync(CountryFilterParameters filters)
     {
-        var countries = await context.Countries
+        var query = context.Countries.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filters.Search))
+        {
+            var term = filters.Search.Trim();
+            query = query.Where(c => EF.Functions.Like(c.Name, $"%{term}%") 
+            || EF.Functions.Like(c.ShortName, $"%{term}%"));
+        }
+
+        var countries = await query
             .ProjectTo<GetCountriesDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -123,49 +131,29 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
             .AnyAsync(c => c.Name.ToLower().Trim() == name.ToLower().Trim());
     }
 
-    public async Task<Result<PagedResult<GetCountriesDto>>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters)
+    public async Task<Result<PagedResult<GetCountryDto>>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters)
     {
         var exists = await CountryExistsAsync(countryId);
         if (!exists)
         {
-            return Result<PagedResult<GetCountriesDto>>.Failure(
+            return Result<PagedResult<GetCountryDto>>.Failure(
                 new Error(ErrorCodes.NotFound, $"Country '{countryId}' was not found."));
         }
 
-        var query = context.Countries.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(filters.CountryName))
-        {
-            var name = filters.CountryName.Trim();
-            query = query.Where(c => EF.Functions.Like(c.Name, $"%{name}%"));
-        }
-
-        if (!string.IsNullOrWhiteSpace(filters.Search))
-        {
-            var term = filters.Search.Trim();
-            query = query.Where(c =>
-                EF.Functions.Like(c.Name, $"%{term}%") ||
-                EF.Functions.Like(c.ShortName, $"%{term}%"));
-        }
-
-        if (filters.HasHotels.HasValue)
-        {
-            query = query.Where(c => c.Hotels.Any() == filters.HasHotels.Value);
-        }
-
-        // Sorting
-        query = (filters.SortBy?.Trim().ToLowerInvariant()) switch
-        {
-            "name" => filters.SortDescending ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
-            "shortname" => filters.SortDescending ? query.OrderByDescending(c => c.ShortName) : query.OrderBy(c => c.ShortName),
-            "hotelcount" => filters.SortDescending ? query.OrderByDescending(c => c.Hotels.Count) : query.OrderBy(c => c.Hotels.Count),
-            _ => query.OrderBy(c => c.Name) // default
-        };
-
-        var paged = await query
-            .ProjectTo<GetCountriesDto>(mapper.ConfigurationProvider)
+        var pagedResults = await context.Countries
+            .Where(q => q.CountryId == countryId)
+            .Select(c => new Country
+            {
+                CountryId = c.CountryId,
+                Name = c.Name,
+                ShortName = c.ShortName,
+                Hotels = !string.IsNullOrWhiteSpace(filters.Search)
+                    ? c.Hotels.Where(h => EF.Functions.Like(h.Name, $"%{filters.Search.Trim()}%")).ToList()
+                    : c.Hotels.ToList()
+            })
+            .ProjectTo<GetCountryDto>(mapper.ConfigurationProvider)
             .ToPagedResultAsync(paginationParameters);
 
-        return Result<PagedResult<GetCountriesDto>>.Success(paged);
+        return Result<PagedResult<GetCountryDto>>.Success(pagedResults);
     }
 }

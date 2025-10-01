@@ -25,16 +25,16 @@ public class HotelsService(HotelListingDbContext context,
         }
 
         if (filters.MinRating.HasValue)
-            query = query.Where(h => h.Rating >= filters.MinRating.Value);
+            query = query.Where(h => h.Rating >= filters.MinRating);
 
         if (filters.MaxRating.HasValue)
-            query = query.Where(h => h.Rating <= filters.MaxRating.Value);
+            query = query.Where(h => h.Rating <= filters.MaxRating);
 
         if (filters.MinPrice.HasValue)
-            query = query.Where(h => h.PerNightRate >= filters.MinPrice.Value);
+            query = query.Where(h => h.PerNightRate >= filters.MinPrice);
 
         if (filters.MaxPrice.HasValue)
-            query = query.Where(h => h.PerNightRate <= filters.MaxPrice.Value);
+            query = query.Where(h => h.PerNightRate <= filters.MaxPrice);
 
         if (!string.IsNullOrWhiteSpace(filters.Location))
             query = query.Where(h => h.Address.Contains(filters.Location));

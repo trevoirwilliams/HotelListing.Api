@@ -16,15 +16,15 @@ public class CountriesController(ICountriesService countriesService) : BaseApiCo
 {
     // GET: api/Countries
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries()
+    public async Task<ActionResult<IEnumerable<GetCountriesDto>>> GetCountries(CountryFilterParameters filters)
     {
-        var result = await countriesService.GetCountriesAsync();
+        var result = await countriesService.GetCountriesAsync(filters);
         return ToActionResult(result);
     }
 
     // GET: api/Countries/{id}/hotels
     [HttpGet("{countryId:int}/hotels")]
-    public async Task<ActionResult<PagedResult<GetCountriesDto>>> GetCountryHotels(
+    public async Task<ActionResult<PagedResult<GetCountryDto>>> GetCountryHotels(
         [FromRoute] int countryId,
         [FromQuery] PaginationParameters paginationParameters,
         [FromQuery] CountryFilterParameters filters)

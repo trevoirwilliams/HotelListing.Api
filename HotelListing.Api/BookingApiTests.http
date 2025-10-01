@@ -5,7 +5,7 @@
 @bookingId=7
 @countryId=1
 @today={{$localDatetime iso8601}} 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODMzYjRhYS05YThlLTRlZWQtYjVhZS0wNmM4ZDYwNTIwNTMiLCJlbWFpbCI6InVzZXJAbG9jYWxob3N0LmNvbSIsImp0aSI6ImY5OWU5YmJlLWUxZTgtNDgyNi1iNmZkLWQ4MWVlOWRmNjViMiIsIm5hbWUiOiIsICIsImV4cCI6MTc1OTEyODM4OCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.nLSQ3jUqBhXcY4KN7HmfqGZ3edFKQV3i7Fsx-jk5d_w
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODMzYjRhYS05YThlLTRlZWQtYjVhZS0wNmM4ZDYwNTIwNTMiLCJlbWFpbCI6InVzZXJAbG9jYWxob3N0LmNvbSIsImp0aSI6IjQyYWE2OTdkLWUxZWQtNDEyYi1iNmNkLTk4ZWRhZjM0MDkxOCIsIm5hbWUiOiIsICIsImV4cCI6MTc1OTMzNDI0MywiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.3NjTzoYFdfioY-GTWVS_KHNj12j3eyJMLCOHdpQSw6s
 ###
 POST {{host}}/api/auth/register
 Content-Type: application/json
@@ -170,10 +170,9 @@ PUT {{host}}/api/hotels/{{hotelId}}/bookings/{{bookingId}}/cancel
 GET {{host}}/api/hotels/{{hotelId}}/bookings/admin
 Authorization: Bearer {{token}}
 
-
-GET {{host}}/api/countries/{{hotelId}}/bookings/admin
+GET {{host}}/api/hotels?pageNumber=3&pageSize=20&minRating=4.1
 Authorization: Bearer {{token}}
 ###
 
-GET {{host}}/api/hotels?pageNumber=3&pageSize=20&minRating=4.1
+GET {{host}}/api/countries/1/hotels?search=t
 Authorization: Bearer {{token}}
