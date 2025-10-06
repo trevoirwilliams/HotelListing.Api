@@ -131,29 +131,48 @@ public class CountriesService(HotelListingDbContext context, IMapper mapper) : I
             .AnyAsync(c => c.Name.ToLower().Trim() == name.ToLower().Trim());
     }
 
-    public async Task<Result<PagedResult<GetCountryDto>>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters)
+    public async Task<Result<GetCountryHotelsDto>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters)
     {
         var exists = await CountryExistsAsync(countryId);
         if (!exists)
         {
-            return Result<PagedResult<GetCountryDto>>.Failure(
+            return Result<GetCountryHotelsDto>.Failure(
                 new Error(ErrorCodes.NotFound, $"Country '{countryId}' was not found."));
         }
 
-        var pagedResults = await context.Countries
+        var countryName = await context.Countries
             .Where(q => q.CountryId == countryId)
-            .Select(c => new Country
-            {
-                CountryId = c.CountryId,
-                Name = c.Name,
-                ShortName = c.ShortName,
-                Hotels = !string.IsNullOrWhiteSpace(filters.Search)
-                    ? c.Hotels.Where(h => EF.Functions.Like(h.Name, $"%{filters.Search.Trim()}%")).ToList()
-                    : c.Hotels.ToList()
-            })
-            .ProjectTo<GetCountryDto>(mapper.ConfigurationProvider)
+            .Select(q => q.Name)
+            .SingleAsync();
+            
+        var hotelsQuery = context.Hotels
+            .Where(h => h.CountryId == countryId)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filters.Search))
+        {
+            var term = filters.Search.Trim();
+            hotelsQuery = hotelsQuery.Where(h => EF.Functions.Like(h.Name, $"%{term}%"));
+        }
+
+        hotelsQuery = (filters.SortBy?.Trim().ToLowerInvariant()) switch
+        {
+            "name" => filters.SortDescending ? hotelsQuery.OrderByDescending(h => h.Name) : hotelsQuery.OrderBy(h => h.Name),
+            "rating" => filters.SortDescending ? hotelsQuery.OrderByDescending(h => h.Rating) : hotelsQuery.OrderBy(h => h.Rating),
+            _ => hotelsQuery.OrderBy(h => h.Name)
+        };
+
+        var pagedHotels = await hotelsQuery
+            .ProjectTo<GetHotelSlimDto>(mapper.ConfigurationProvider)
             .ToPagedResultAsync(paginationParameters);
 
-        return Result<PagedResult<GetCountryDto>>.Success(pagedResults);
+        var result = new GetCountryHotelsDto
+        {
+            Id = countryId,
+            Name = countryName,
+            Hotels = pagedHotels
+        };
+
+        return Result<GetCountryHotelsDto>.Success(result);
     }
 }

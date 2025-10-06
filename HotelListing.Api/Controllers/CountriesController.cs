@@ -24,7 +24,7 @@ public class CountriesController(ICountriesService countriesService) : BaseApiCo
 
     // GET: api/Countries/{id}/hotels
     [HttpGet("{countryId:int}/hotels")]
-    public async Task<ActionResult<PagedResult<GetCountryDto>>> GetCountryHotels(
+    public async Task<ActionResult<GetCountryHotelsDto>> GetCountryHotels(
         [FromRoute] int countryId,
         [FromQuery] PaginationParameters paginationParameters,
         [FromQuery] CountryFilterParameters filters)

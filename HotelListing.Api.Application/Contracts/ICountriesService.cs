@@ -13,7 +13,7 @@ public interface ICountriesService
     Task<Result<GetCountryDto>> CreateCountryAsync(CreateCountryDto createDto);
     Task<Result> DeleteCountryAsync(int id);
     Task<Result<IEnumerable<GetCountriesDto>>> GetCountriesAsync(CountryFilterParameters filters);
-    Task<Result<PagedResult<GetCountryDto>>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters);
+    Task<Result<GetCountryHotelsDto>> GetCountryHotelsAsync(int countryId, PaginationParameters paginationParameters, CountryFilterParameters filters);
     Task<Result<GetCountryDto>> GetCountryAsync(int id);
     Task<Result> UpdateCountryAsync(int id, UpdateCountryDto updateDto);
 }
