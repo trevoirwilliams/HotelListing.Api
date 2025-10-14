@@ -5,6 +5,7 @@ using HotelListing.Api.Common.Models.Filtering;
 using HotelListing.Api.Common.Models.Paging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace HotelListing.Api.Controllers;
 
@@ -14,6 +15,7 @@ namespace HotelListing.Api.Controllers;
 public class HotelBookingsController(IBookingService bookingService) : BaseApiController
 {
     [HttpGet]
+    [OutputCache(PolicyName = "CustomPolicy")]
     public async Task<ActionResult<PagedResult<GetBookingDto>>> GetBookings(
         [FromRoute] int hotelId,
         [FromQuery] PaginationParameters paginationParameters,

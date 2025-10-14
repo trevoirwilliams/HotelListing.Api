@@ -1,12 +1,16 @@
 @HotelListing.Api_HostAddress = https://localhost:7124
 @json = application/json
 @apiKey=dXNlcjFAbG9jYWxob3N0LmNvbTpQQHNzrbd29yZDE=
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmODMzYjRhYS05YThlLTRlZWQtYjVhZS0wNmM4ZDYwNTIwNTMiLCJlbWFpbCI6InVzZXJAbG9jYWxob3N0LmNvbSIsImp0aSI6ImY5OWU5YmJlLWUxZTgtNDgyNi1iNmZkLWQ4MWVlOWRmNjViMiIsIm5hbWUiOiIsICIsImV4cCI6MTc1OTEyODM4OCwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.nLSQ3jUqBhXcY4KN7HmfqGZ3edFKQV3i7Fsx-jk5d_w
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3YS0xOWRjLTRjOWEtOGEwMC05OTk4ODFiNzQ0MWUiLCJlbWFpbCI6ImFkbWluMUBsb2NhbGhvc3QuY29tIiwianRpIjoiYTYzODQ0YmEtZjdiNi00OGE5LWJiZmUtZGNmZWU0ZmJhYzgzIiwibmFtZSI6Ikxhc3QsIEZpcnN0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc2MDQxNzMxNywiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.0UxL5yhE7CY2wK2Fa5E1EHrWk_LJzXM3CxwFL4FTjn0
 @id=3
-@countryId=90
+@countryId=6
 @pageSize=5
 
-GET {{HotelListing.Api_HostAddress}}/api/countries?countryName=United&pageNumber=1&pageSize=20
+GET {{HotelListing.Api_HostAddress}}/api/countries
+#Authorization: Bearer {{token}}
+###
+
+GET {{HotelListing.Api_HostAddress}}/api/countries?Search=United
 Authorization: Bearer {{token}}
 ###
 
@@ -16,7 +20,7 @@ Authorization: Bearer {{token}}
 ###
 
 POST {{HotelListing.Api_HostAddress}}/api/countries
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3YS0xOWRjLTRjOWEtOGEwMC05OTk4ODFiNzQ0MWUiLCJlbWFpbCI6ImFkbWluMUBsb2NhbGhvc3QuY29tIiwianRpIjoiZDFkMDk1N2ItZTM0Zi00Y2VlLWJjODMtMWZiMzk4NDlmYzY3IiwibmFtZSI6Ikxhc3QsIEZpcnN0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW5pc3RyYXRvciIsImV4cCI6MTc1NjUyNTA2NSwiaXNzIjoiSG90ZWxMaXN0aW5nQVBJIiwiYXVkIjoiSG90ZWxMaXN0aW5nQVBJQ2xpZW50In0.t2tATBbdWAdXPQKTR0QhOX76PZc4Narm_XIBWx8-yKU
+Authorization: Bearer {{token}}
 Content-Type: {{json}}
 
 {
@@ -31,6 +35,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NjIzYjQ3Y
 ###
 
 GET {{HotelListing.Api_HostAddress}}/api/countries/{{id}}
+###
+
+GET {{HotelListing.Api_HostAddress}}/api/countries/
+Authorization: Bearer {{token}}
 
 ###
 
@@ -41,6 +49,19 @@ Content-Type: {{json}}
   "name": "Jamaica",
   "shortName": "JM"
 }
+###
+
+PATCH {{HotelListing.Api_HostAddress}}/api/countries/{{countryId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json-patch+json
+
+[
+  {
+    "op": "replace",  
+    "path": "/shortName",
+    "value": "TAC"
+  }
+]
 ###
 
 GET {{HotelListing.Api_HostAddress}}/api/hotels
@@ -64,6 +85,7 @@ DELETE {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
 ###
 
 GET {{HotelListing.Api_HostAddress}}/api/hotels/{{id}}
+Authorization: Bearer {{token}}
 
 ###
 
