@@ -1,4 +1,5 @@
-﻿using HotelListing.Api.Application.Contracts;
+﻿using AutoMapper;
+using HotelListing.Api.Application.Contracts;
 using HotelListing.Api.Application.MappingProfiles;
 using HotelListing.Api.Application.Services;
 using HotelListing.Api.CachePolicies;
@@ -6,19 +7,23 @@ using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Common.Models.Config;
 using HotelListing.Api.Domain;
 using HotelListing.Api.Handlers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
+using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the IoC container.
 var connectionString = builder.Configuration.GetConnectionString("HotelListingDbConnectionString");
 
-builder.Services.AddDbContextPool<HotelListingDbContext>(options =>
-{
-    options.UseSqlServer(connectionString, sqlOptions =>
-    {
+builder.Services.AddDbContextPool<HotelListingDbContext>(options => {
+    options.UseSqlServer(connectionString, sqlOptions => {
         sqlOptions.CommandTimeout(30);
         sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 3,
@@ -92,8 +97,7 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 //builder.Services.AddMemoryCache();
-builder.Services.AddOutputCache(options =>
-{
+builder.Services.AddOutputCache(options => {
     options.AddPolicy(CacheConstants.AuthenticatedUserCachingPolicy, builder =>
     {
         builder.AddPolicy<AuthenticatedUserCachingPolicy>()
@@ -101,8 +105,7 @@ builder.Services.AddOutputCache(options =>
     }, true);
 });
 
-builder.Services.AddRateLimiter(options =>
-{
+builder.Services.AddRateLimiter(options => {
     options.AddFixedWindowLimiter(RateLimitingConstants.FixedPolicy, opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
