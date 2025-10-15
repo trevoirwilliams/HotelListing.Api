@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using HotelListing.Api.Application.Contracts;
+﻿using HotelListing.Api.Application.Contracts;
 using HotelListing.Api.Application.MappingProfiles;
 using HotelListing.Api.Application.Services;
 using HotelListing.Api.CachePolicies;
@@ -7,21 +6,19 @@ using HotelListing.Api.Common.Constants;
 using HotelListing.Api.Common.Models.Config;
 using HotelListing.Api.Domain;
 using HotelListing.Api.Handlers;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Reflection;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the IoC container.
 var connectionString = builder.Configuration.GetConnectionString("HotelListingDbConnectionString");
 
-builder.Services.AddDbContextPool<HotelListingDbContext>(options => {
-    options.UseSqlServer(connectionString, sqlOptions => {
+builder.Services.AddDbContextPool<HotelListingDbContext>(options =>
+{
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
         sqlOptions.CommandTimeout(30);
         sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 3,
@@ -95,7 +92,8 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 //builder.Services.AddMemoryCache();
-builder.Services.AddOutputCache(options => {
+builder.Services.AddOutputCache(options =>
+{
     options.AddPolicy(CacheConstants.AuthenticatedUserCachingPolicy, builder =>
     {
         builder.AddPolicy<AuthenticatedUserCachingPolicy>()
@@ -103,6 +101,64 @@ builder.Services.AddOutputCache(options => {
     }, true);
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter(RateLimitingConstants.FixedPolicy, opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 50;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 5;
+    });
+
+    options.AddPolicy(RateLimitingConstants.PerUserPolicy, context =>
+    {
+        var username = context.User?.Identity?.Name ?? "anonymous";
+
+        return RateLimitPartition.GetSlidingWindowLimiter(username, _ => new SlidingWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = 50,
+            SegmentsPerWindow = 6,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 3
+        });
+    });
+
+    // Global rate limit by IP
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(ipAddress, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = 200,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 10
+        });
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = retryAfter.TotalSeconds.ToString();
+        }
+
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "Too many requests",
+            message = "Rate limit exceeded. Please try again later.",
+            retryAfter = retryAfter.TotalSeconds
+        }, cancellationToken: cancellationToken);
+    };
+});
 
 var app = builder.Build();
 
@@ -115,6 +171,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 
