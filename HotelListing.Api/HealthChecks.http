@@ -1,0 +1,145 @@
+### Health Checks Testing
+### Base URL
+@baseUrl = https://localhost:7124
+
+### 1. Full Health Check (Detailed JSON)
+### Returns detailed status of all health checks with timing information
+GET {{baseUrl}}/healthz
+Accept: application/json
+
+###
+
+### 2. Liveness Probe
+### Checks if the application is alive and can process requests
+### Should always return 200 OK if the application is running
+GET {{baseUrl}}/healthz/live
+
+###
+
+### 3. Readiness Probe
+### Checks if the application is ready to accept traffic (database connectivity)
+### Returns 200 OK if database is accessible, 503 if not ready
+GET {{baseUrl}}/healthz/ready
+
+###
+
+### =================================================================
+### Expected Responses
+### =================================================================
+
+### Full Health Check Response Example:
+# {
+#   "status": "Healthy",
+#   "checks": [
+#     {
+#       "name": "self",
+#       "status": "Healthy",
+#       "description": "Application is running",
+#       "duration": 0.1234,
+#       "exception": null,
+#       "data": {}
+#     },
+#     {
+#       "name": "database",
+#       "status": "Healthy",
+#       "description": null,
+#       "duration": 45.67,
+#       "exception": null,
+#       "data": {}
+#     }
+#   ],
+#   "totalDuration": 45.8
+# }
+
+### Liveness Probe Response:
+# HTTP/1.1 200 OK
+# Content-Type: text/plain
+# Healthy
+
+### Readiness Probe Response (Healthy):
+# HTTP/1.1 200 OK
+# Content-Type: text/plain
+# Healthy
+
+### Readiness Probe Response (Unhealthy):
+# HTTP/1.1 503 Service Unavailable
+# Content-Type: text/plain
+# Unhealthy
+
+###
+
+### =================================================================
+### Testing Scenarios
+### =================================================================
+
+### Test 1: Verify All Checks Pass
+### Run this when application and database are running normally
+GET {{baseUrl}}/healthz
+
+###
+
+### Test 2: Liveness During Database Outage
+### This should still return 200 OK even if database is down
+### (Simulate by stopping SQL Server temporarily)
+GET {{baseUrl}}/healthz/live
+
+###
+
+### Test 3: Readiness During Database Outage
+### This should return 503 Service Unavailable if database is down
+### (Simulate by stopping SQL Server temporarily)
+GET {{baseUrl}}/healthz/ready
+
+###
+
+### =================================================================
+### Kubernetes/Docker Configuration Reference
+### =================================================================
+
+# Example Kubernetes livenessProbe:
+# livenessProbe:
+#   httpGet:
+#     path: /healthz/live
+#     port: 8080
+#   initialDelaySeconds: 10
+#   periodSeconds: 30
+#   timeoutSeconds: 5
+#   failureThreshold: 3
+
+# Example Kubernetes readinessProbe:
+# readinessProbe:
+#   httpGet:
+#     path: /healthz/ready
+#     port: 8080
+#   initialDelaySeconds: 5
+#   periodSeconds: 10
+#   timeoutSeconds: 3
+#   failureThreshold: 3
+
+###
+
+### =================================================================
+### Load Balancer / Monitoring Integration
+### =================================================================
+
+### Check for monitoring tools (Prometheus, Grafana, Azure Monitor, etc.)
+### These endpoints can be polled every 10-30 seconds
+GET {{baseUrl}}/healthz
+Accept: application/json
+
+###
+
+### =================================================================
+### Quick Status Check (All Endpoints)
+### =================================================================
+
+### Check Full Health
+GET {{baseUrl}}/healthz
+
+### Check Liveness
+GET {{baseUrl}}/healthz/live
+
+### Check Readiness
+GET {{baseUrl}}/healthz/ready
+
+###
