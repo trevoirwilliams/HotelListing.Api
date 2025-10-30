@@ -10,6 +10,17 @@ GET {{HotelListing.Api_HostAddress}}/api/countries
 #Authorization: Bearer {{token}}
 ###
 
+### Get all countries (v1)
+GET {{HotelListing.Api_HostAddress}}/api/v1/Countries
+Authorization: Bearer {{token}}
+
+###
+
+### Get all countries (v2)
+GET {{HotelListing.Api_HostAddress}}/api/v2/Countries?pageNumber=1&pageSize=20
+
+###
+
 GET {{HotelListing.Api_HostAddress}}/api/countries?Search=United
 Authorization: Bearer {{token}}
 ###
