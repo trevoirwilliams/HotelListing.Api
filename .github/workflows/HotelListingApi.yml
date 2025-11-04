@@ -47,6 +47,7 @@ jobs:
     - name: Azure Login
       uses: azure/login@v2
       with:
+        auth-type: IDENTITY
         client-id: ${{ secrets.HotelListingApi_CLIENT_ID_4E44 }}
         tenant-id: ${{ secrets.HotelListingApi_TENANT_ID_4E44 }}
         subscription-id: ${{ secrets.HotelListingApi_SUBSCRIPTION_ID_4E44 }}
