@@ -47,9 +47,9 @@ jobs:
     - name: Azure Login
       uses: azure/login@v2
       with:
-        client-id: ${{ vars.HotelListingApi_CLIENT_ID_4E44 }}
-        tenant-id: ${{ vars.HotelListingApi_TENANT_ID_4E44 }}
-        subscription-id: ${{ vars.HotelListingApi_SUBSCRIPTION_ID_4E44 }}
+        client-id: ${{ secrets.HotelListingApi_CLIENT_ID_4E44 }}
+        tenant-id: ${{ secrets.HotelListingApi_TENANT_ID_4E44 }}
+        subscription-id: ${{ secrets.HotelListingApi_SUBSCRIPTION_ID_4E44 }}
     - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v2
       with:
